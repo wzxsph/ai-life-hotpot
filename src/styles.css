@@ -62,26 +62,27 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --radius: 0.75rem;
+  /* 中式火锅夜市气质 */
+  --background: oklch(0.21 0.04 40);   /* 深棕夜色 */
+  --foreground: oklch(0.95 0.04 80);   /* 米黄 */
+  --card: oklch(0.27 0.05 45);
+  --card-foreground: oklch(0.95 0.04 80);
+  --popover: oklch(0.27 0.05 45);
+  --popover-foreground: oklch(0.95 0.04 80);
+  --primary: oklch(0.58 0.22 30);      /* 暖辣红 #C8201F */
+  --primary-foreground: oklch(0.98 0.02 80);
+  --secondary: oklch(0.78 0.14 80);    /* 金 #E8B547 */
+  --secondary-foreground: oklch(0.2 0.04 40);
+  --muted: oklch(0.3 0.04 45);
+  --muted-foreground: oklch(0.78 0.05 80);
+  --accent: oklch(0.78 0.14 80);
+  --accent-foreground: oklch(0.2 0.04 40);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.4 0.06 50);
+  --input: oklch(0.32 0.04 45);
+  --ring: oklch(0.78 0.14 80);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +141,41 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", system-ui, sans-serif;
+  }
+
+  h1, h2, h3, .font-serif-sc {
+    font-family: "Noto Serif SC", "Songti SC", "STSong", serif;
+  }
+}
+
+@layer utilities {
+  .bg-noise {
+    background-image:
+      radial-gradient(circle at 20% 10%, oklch(0.35 0.08 50 / 0.4), transparent 50%),
+      radial-gradient(circle at 80% 90%, oklch(0.45 0.18 30 / 0.35), transparent 55%),
+      radial-gradient(circle at 50% 50%, oklch(0.25 0.04 40), oklch(0.18 0.03 40));
+  }
+  .text-glow-gold {
+    text-shadow: 0 0 18px oklch(0.78 0.14 80 / 0.6), 0 1px 0 oklch(0.2 0.04 40);
+  }
+  @keyframes hp-bubble {
+    0% { transform: translateY(0) scale(0.6); opacity: 0; }
+    30% { opacity: 0.9; }
+    100% { transform: translateY(-90px) scale(1.2); opacity: 0; }
+  }
+  @keyframes hp-steam {
+    0% { transform: translateY(0) scaleX(1); opacity: 0; }
+    25% { opacity: 0.7; }
+    100% { transform: translateY(-160px) scaleX(1.6); opacity: 0; }
+  }
+  @keyframes hp-drop {
+    0% { transform: translateY(-180px) rotate(0deg); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateY(0) rotate(40deg); opacity: 1; }
+  }
+  @keyframes hp-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 oklch(0.78 0.14 80 / 0.5); }
+    50% { box-shadow: 0 0 0 14px oklch(0.78 0.14 80 / 0); }
   }
 }
