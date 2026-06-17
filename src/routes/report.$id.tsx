@@ -50,8 +50,11 @@ function Report() {
       .catch(() => setQr(null));
   }, [id]);
 
-  if (!summary || !summary.base) return <ReportError />;
-  const report = useMemo(() => buildReport(summary), [summary]);
+  const report = useMemo(
+    () => (summary && summary.base ? buildReport(summary) : null),
+    [summary],
+  );
+  if (!report) return <ReportError />;
 
   return (
     <div className="bg-noise min-h-screen px-4 py-10 sm:px-8">
