@@ -382,3 +382,21 @@
 .lh-card:active {
   transform: translateY(-1px);
 }
+
+/* 食材"下锅":从食材在环上的位置划弧飞向中央锅。
+   --dx/--dy 为目标(锅心)相对源点的位移,内联设置;中段抬升 64px 形成抛物线。 */
+@keyframes lhFly {
+  0% {
+    transform: translate(-50%, -50%) translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  35% {
+    transform: translate(-50%, -50%) translate(calc(var(--dx) * 0.4), calc(var(--dy) * 0.4 - 64px))
+      scale(0.95) rotate(-12deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.4) rotate(20deg);
+    opacity: 0.15;
+  }
+}

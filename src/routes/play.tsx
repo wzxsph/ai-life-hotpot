@@ -640,6 +640,18 @@ function IngStep({
   });
   const mm = Math.floor(secs / 60);
   const ss = String(secs % 60).padStart(2, "0");
+
+  // 下锅飞入:仅"新增"食材时,从食材位置划弧飞向锅心(640,400)。
+  const [flyers, setFlyers] = useState<{ key: number; food: string; x: number; y: number }[]>([]);
+  const flyKey = useRef(0);
+  const handlePick = (it: (typeof INGREDIENTS)[number], x: number, y: number) => {
+    if (!ings.includes(it.id)) {
+      const key = flyKey.current++;
+      setFlyers((f) => [...f, { key, food: it.food, x, y }]);
+      window.setTimeout(() => setFlyers((f) => f.filter((p) => p.key !== key)), 700);
+    }
+    onToggle(it.id);
+  };
   return (
     <>
       <div
@@ -706,8 +718,8 @@ function IngStep({
             role="button"
             tabIndex={0}
             aria-pressed={sel}
-            onClick={() => onToggle(it.id)}
-            onKeyDown={(e) => e.key === "Enter" && onToggle(it.id)}
+            onClick={() => handlePick(it, x, y)}
+            onKeyDown={(e) => e.key === "Enter" && handlePick(it, x, y)}
             style={{
               position: "absolute",
               left: x,
@@ -772,6 +784,28 @@ function IngStep({
           </div>
         );
       })}
+
+      {/* 下锅飞入的食材 */}
+      {flyers.map((p) => (
+        <div
+          key={p.key}
+          style={{
+            position: "absolute",
+            left: p.x,
+            top: p.y,
+            width: 64,
+            height: 64,
+            pointerEvents: "none",
+            zIndex: 5,
+            filter: "drop-shadow(0 6px 8px rgba(80,50,25,.3))",
+            animation: "lhFly .7s cubic-bezier(.5,0,.7,1) forwards",
+            ["--dx" as string]: `${640 - p.x}px`,
+            ["--dy" as string]: `${400 - p.y}px`,
+          }}
+        >
+          <RealFoodVisual food={p.food} size={64} />
+        </div>
+      ))}
 
       {/* 人生值 */}
       <div style={{ position: "absolute", left: 34, bottom: 30 }}>
