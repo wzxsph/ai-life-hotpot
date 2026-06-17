@@ -4,7 +4,11 @@ const KEY = "hotpot:session";
 
 export function loadSession(): Partial<SelectionSummary> {
   if (typeof window === "undefined") return {};
-  try { return JSON.parse(sessionStorage.getItem(KEY) ?? "{}"); } catch { return {}; }
+  try {
+    return JSON.parse(sessionStorage.getItem(KEY) ?? "{}");
+  } catch {
+    return {};
+  }
 }
 
 export function saveSession(s: Partial<SelectionSummary>) {

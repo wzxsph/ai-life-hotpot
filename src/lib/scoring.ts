@@ -7,7 +7,7 @@ export interface Pick {
 }
 
 export interface SelectionSummary {
-  base: string;
+  base: string[]; // 两个锅底 id(鸳鸯各一)
   ingredients: string[];
   condiments: string[];
   picks: Pick[];
@@ -24,7 +24,11 @@ export interface CoinDistribution {
 
 export function computeCoins(summary: SelectionSummary): CoinDistribution {
   const acc: Record<Dim, number> = {
-    wealth: 0, love: 0, freedom: 0, family: 0, dream: 0,
+    wealth: 0,
+    love: 0,
+    freedom: 0,
+    family: 0,
+    dream: 0,
   };
   for (const pick of summary.picks) {
     const item = itemById(pick.id);
@@ -46,8 +50,9 @@ export function computeCoins(summary: SelectionSummary): CoinDistribution {
   for (const d of DIMS) rounded[d] = Math.round(raw[d]);
   let drift = 100 - DIMS.reduce((s, d) => s + rounded[d], 0);
   // distribute drift to the dimensions with largest fractional part
-  const fracs = DIMS.map((d) => ({ d, frac: raw[d] - Math.floor(raw[d]) }))
-    .sort((a, b) => b.frac - a.frac);
+  const fracs = DIMS.map((d) => ({ d, frac: raw[d] - Math.floor(raw[d]) })).sort(
+    (a, b) => b.frac - a.frac,
+  );
   let i = 0;
   while (drift !== 0) {
     const d = fracs[i % fracs.length].d;
@@ -62,7 +67,7 @@ export function topDims(coins: CoinDistribution, n = 2): Dim[] {
   return [...DIMS].sort((a, b) => coins[b] - coins[a]).slice(0, n);
 }
 
-// URL-safe encode/decode
+// URL-safe encode/decode(报告可分享的核心)
 export function encodeSummary(s: SelectionSummary): string {
   // strip photo from URL payload (keep it local only)
   const lite = { b: s.base, i: s.ingredients, c: s.condiments, p: s.picks };
@@ -71,17 +76,22 @@ export function encodeSummary(s: SelectionSummary): string {
     return Buffer.from(json, "utf8").toString("base64url");
   }
   return btoa(unescape(encodeURIComponent(json)))
-    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 }
 
 export function decodeSummary(id: string): SelectionSummary | null {
   try {
     const b64 = id.replace(/-/g, "+").replace(/_/g, "/");
-    const json = typeof window === "undefined"
-      ? Buffer.from(b64, "base64").toString("utf8")
-      : decodeURIComponent(escape(atob(b64)));
+    const json =
+      typeof window === "undefined"
+        ? Buffer.from(b64, "base64").toString("utf8")
+        : decodeURIComponent(escape(atob(b64)));
     const lite = JSON.parse(json);
-    return { base: lite.b, ingredients: lite.i, condiments: lite.c, picks: lite.p };
+    // base 为数组(鸳鸯两个锅底);兼容历史单值格式
+    const base: string[] = Array.isArray(lite.b) ? lite.b : lite.b ? [lite.b] : [];
+    return { base, ingredients: lite.i ?? [], condiments: lite.c ?? [], picks: lite.p ?? [] };
   } catch {
     return null;
   }

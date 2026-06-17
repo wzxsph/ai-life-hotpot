@@ -77,18 +77,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "AI-powered web app that recreates a screenshot's design and functionality." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "AI-powered web app that recreates a screenshot's design and functionality." },
+      { title: "AI 人生火锅 · Life Hotpot" },
+      { name: "description", content: "你以为自己在配火锅，其实你正在构建人生。" },
+      { name: "author", content: "AI 人生火锅" },
+      { property: "og:title", content: "AI 人生火锅" },
+      { property: "og:description", content: "你以为自己在配火锅，其实你正在构建人生。" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "AI-powered web app that recreates a screenshot's design and functionality." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ca585191-28a1-407b-ac01-881cba79307c/id-preview-47febe27--d749db5d-1e1f-4444-a25f-af1d42946819.lovable.app-1781700896411.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ca585191-28a1-407b-ac01-881cba79307c/id-preview-47febe27--d749db5d-1e1f-4444-a25f-af1d42946819.lovable.app-1781700896411.png" },
+      { name: "twitter:title", content: "AI 人生火锅" },
+      { name: "twitter:description", content: "你以为自己在配火锅，其实你正在构建人生。" },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ca585191-28a1-407b-ac01-881cba79307c/id-preview-47febe27--d749db5d-1e1f-4444-a25f-af1d42946819.lovable.app-1781700896411.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ca585191-28a1-407b-ac01-881cba79307c/id-preview-47febe27--d749db5d-1e1f-4444-a25f-af1d42946819.lovable.app-1781700896411.png",
+      },
     ],
     links: [
       {

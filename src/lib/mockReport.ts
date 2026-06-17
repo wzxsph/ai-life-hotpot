@@ -1,107 +1,104 @@
-import { BASES, CONDIMENTS, DIM_LABEL, INGREDIENTS, type Dim } from "@/data/hotpot";
+// 人生火锅报告生成,叙事模板对齐 LifeHotpot.dc.html 的 buildReport()。
+// 注:目前为确定性模板;PRD 要求接入真实 AI,此处为占位实现,接口已抽好便于替换。
+
+import {
+  BASES,
+  CONDIMENTS,
+  DIM_COLOR,
+  DIM_LABEL,
+  DIMS,
+  INGREDIENTS,
+  type Base,
+  type Condiment,
+  type Dim,
+  type Ingredient,
+} from "@/data/hotpot";
 import { computeCoins, topDims, type CoinDistribution, type SelectionSummary } from "./scoring";
 
-export interface LifeReport {
-  baseName: string;
-  baseTone: string;
-  baseTagline: string;
-  ingredientNames: string[];
-  condimentStyles: string[];
-  coins: CoinDistribution;
-  top: Dim[];
-  flavor: string; // 命运口味 (one line)
-  story: string; // 人生故事
-  values: string; // 人生锅底解读
-  resources: string; // 核心食材解读
-  behavior: string; // 灵魂蘸料解读
+export interface CoinBar {
+  key: Dim;
+  name: string;
+  color: string;
+  val: number;
 }
 
-const DIM_NARR: Record<Dim, { strong: string; weak: string; verb: string }> = {
-  wealth: {
-    strong: "你愿意为自己想要的生活买单",
-    weak: "你对金钱有点漫不经心",
-    verb: "搭建",
-  },
-  love: {
-    strong: "你把爱当成日常的盐",
-    weak: "你把爱情藏在很深的地方",
-    verb: "靠近",
-  },
-  freedom: {
-    strong: "你比谁都怕被框住",
-    weak: "你愿意为重要的人停下来",
-    verb: "出走",
-  },
-  family: {
-    strong: "你心里始终有一盏给家人留的灯",
-    weak: "你正在重新定义“家”这件事",
-    verb: "守护",
-  },
-  dream: {
-    strong: "你心里那点疯狂从没真正熄灭",
-    weak: "你把梦想小心地藏在抽屉里",
-    verb: "追",
-  },
+export interface LifeReport {
+  flavor: string; // 命运口味
+  baseName: string; // 人生锅底
+  coreIng: string; // 核心食材
+  soulSauce: string; // 灵魂蘸料
+  coins: CoinBar[]; // 一百金币 · 5 条
+  story: string; // 人生故事
+  top: Dim[]; // 前两个维度
+  baseTone: string;
+  condimentStyles: string[];
+}
+
+const ADJ: Record<Dim, string> = {
+  wealth: "务实",
+  love: "深情",
+  freedom: "自由",
+  family: "恋家",
+  dream: "理想",
 };
 
-function pick<T>(arr: T[], seed: number): T {
-  return arr[seed % arr.length];
-}
-
-function hash(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-  return h;
-}
-
-const FLAVORS = [
-  "外面热闹，里面清醒",
-  "辣得理直气壮，甜得毫无防备",
-  "看起来随性，其实算得很清楚",
-  "在烟火气里偷偷做梦",
-  "温柔得很坚定",
-  "把日子煮成自己的口味",
-];
+const DIMLINE: Record<Dim, string> = {
+  wealth: "你信靠自己一手挣来的踏实。",
+  love: "你总愿意为在乎的人慢下来。",
+  freedom: "你最怕的，是被别人定义。",
+  family: "你心里始终有个想守住的地方。",
+  dream: "你心里那团火，一直没熄。",
+};
 
 export function buildReport(summary: SelectionSummary): LifeReport {
-  const base = BASES.find((b) => b.id === summary.base) ?? BASES[0];
+  // 鸳鸯锅:base 为数组,最多两个锅底
+  const chosenBases = (Array.isArray(summary.base) ? summary.base : [])
+    .map((id) => BASES.find((b) => b.id === id))
+    .filter((b): b is Base => !!b);
+  const b0 = chosenBases[0] ?? BASES[0];
+  const b1 = chosenBases[1];
   const ings = summary.ingredients
     .map((id) => INGREDIENTS.find((i) => i.id === id))
-    .filter((x): x is NonNullable<typeof x> => !!x);
+    .filter((x): x is Ingredient => !!x);
   const conds = summary.condiments
     .map((id) => CONDIMENTS.find((c) => c.id === id))
-    .filter((x): x is NonNullable<typeof x> => !!x);
-  const coins = computeCoins(summary);
-  const top = topDims(coins, 2);
-  const seed = hash(summary.base + summary.ingredients.join(",") + summary.condiments.join(","));
+    .filter((x): x is Condiment => !!x);
 
-  const flavor = pick(FLAVORS, seed);
-  const t0 = top[0];
-  const t1 = top[1];
+  const coins: CoinDistribution = computeCoins(summary);
+  const top = topDims(coins, 2);
+  const t1 = top[0];
+  const t2 = top[1];
+
+  const meats = ings.filter((i) => i.kind === "meat");
+  const vegs = ings.filter((i) => i.kind === "veg");
+  // 核心食材:cost 最高的荤,否则首个素
+  const coreMeat = meats.slice().sort((a, b) => b.cost - a.cost)[0];
+
+  const toneText = b1 ? `${b0.tone} · ${b1.tone}` : b0.tone;
+  const flavor = `${toneText}底色之下 · ${ADJ[t1]}又${ADJ[t2]}的人`;
+  const styleWord = conds[0] ? conds[0].style : "随性";
+  const baseText = b1
+    ? `你给人生配了一锅鸳鸯:${b0.name}作底,${b1.name}相和——${b0.tagline},${b1.tagline}。`
+    : `你给人生选了「${b0.name}」作底——${b0.tagline}。`;
+
   const story =
-    `你挑了一锅${base.name}，${base.tagline}。` +
-    `你最舍得放下去的，是${ings.slice(0, 2).map((i) => i.name).join("和")}——` +
-    `${DIM_NARR[t0].strong}，所以你正在用力${DIM_NARR[t0].verb}属于自己的${DIM_LABEL[t0]}。` +
-    `蘸料里那一勺${conds[0]?.name ?? "麻酱"}出卖了你：` +
-    `${conds.map((c) => c.style).join("又")}，是你处理世界的方式。` +
-    `如果给你 100 枚金币，你会把 ${coins[t0]} 枚押给${DIM_LABEL[t0]}，` +
-    `${coins[t1]} 枚留给${DIM_LABEL[t1]}，剩下的零钱撒在生活的边角料里。` +
-    `${DIM_NARR[t1].strong}——这就是为什么你这锅，味道这么像你。`;
+    baseText +
+    `荤里你挑了${meats.map((m) => m.name).join("、") || "几样顺手的"},` +
+    `素里配上${vegs.map((v) => v.name).join("、") || "一点清淡"},` +
+    `蘸料偏${conds.map((s) => s.style).join("、") || "清淡"},是个${styleWord}的人。` +
+    `若把人生折成一百枚金币,你会把最多的押在「${DIM_LABEL[t1]}」上,` +
+    `其次留给「${DIM_LABEL[t2]}」——${DIMLINE[t1]}` +
+    `这一锅,火候正好。你以为只是配了顿火锅,其实早已熬出了自己的人生味道。`;
 
   return {
-    baseName: base.name,
-    baseTone: base.tone,
-    baseTagline: base.tagline,
-    ingredientNames: ings.map((i) => i.name),
-    condimentStyles: conds.map((c) => c.style),
-    coins,
-    top,
     flavor,
+    baseName: b1 ? `${b0.name} · ${b1.name}` : b0.name,
+    baseTone: toneText,
+    coreIng: coreMeat ? coreMeat.name : vegs[0] ? vegs[0].name : "—",
+    soulSauce: conds[0] ? conds[0].name : "原味",
+    coins: DIMS.map((d) => ({ key: d, name: DIM_LABEL[d], color: DIM_COLOR[d], val: coins[d] })),
     story,
-    values: `${base.tone}是你做人的底色。${base.tagline}。`,
-    resources: `你愿意把人生的资源更多投在${DIM_LABEL[t0]}和${DIM_LABEL[t1]}上。`,
-    behavior: conds.length
-      ? `你处理事情的方式是「${conds.map((c) => c.style).join("·")}」。`
-      : "你处理事情有自己的节奏。",
+    top,
+    condimentStyles: conds.map((c) => c.style),
   };
 }
