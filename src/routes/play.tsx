@@ -20,7 +20,7 @@ export const Route = createFileRoute("/play")({
 
 const serif = "'Noto Serif SC',serif";
 const BOIL_LINES = ["我们已经观察你三分钟。", "你以为自己在配火锅。", "其实，你正在构建人生。"];
-const TIMER_SECONDS = 120;
+const TIMER_SECONDS = 60;
 const C = { cx: 640, cy: 412 };
 
 const btnPrimary: CSSProperties = {
@@ -715,7 +715,7 @@ function IngStep({
             color: "#7a3228",
           }}
         >
-          两分 · {mm}:{ss}
+          一分 · {mm}:{ss}
         </div>
         <div style={{ fontSize: 12, color: "#8a6a44", marginTop: 3, letterSpacing: ".1em" }}>
           荤 {meatPicked} · 素 {vegPicked} · 多少不限，可不选
