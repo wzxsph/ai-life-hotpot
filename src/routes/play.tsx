@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 
 import { BASES, CONDIMENTS, INGREDIENTS, itemById } from "@/data/hotpot";
 import { Stage } from "@/components/Stage";
 import { YuanyangPot } from "@/components/hotpot-art";
+import { GestureGameLayer } from "@/components/GestureGameLayer";
 import { encodeSummary, type Pick, type SelectionSummary } from "@/lib/scoring";
 import { loadSession, saveSession } from "@/lib/session";
 
@@ -136,6 +137,23 @@ function Play() {
   const stepStartRef = useRef(Date.now());
   const orderRef = useRef(0);
 
+  // Gesture game state
+  const [gestureEnabled, setGestureEnabled] = useState(false);
+  const [grabbedFoodId, setGrabbedFoodId] = useState<string | null>(null);
+  const [showGestureGuide, setShowGestureGuide] = useState(true);
+
+  // Calculate food positions for gesture detection
+  const foodPositions = INGREDIENTS.map((it, i) => {
+    const a = -Math.PI / 2 + (i + 0.5) * ((2 * Math.PI) / 12);
+    return {
+      id: it.id,
+      x: C.cx + 440 * Math.cos(a),
+      y: C.cy + 200 * Math.sin(a),
+      originX: C.cx + 440 * Math.cos(a),
+      originY: C.cy + 200 * Math.sin(a),
+    };
+  });
+
   useEffect(() => {
     stepStartRef.current = Date.now();
   }, [step]);
@@ -173,6 +191,21 @@ function Play() {
     stepStartRef.current = now;
     if (item) {
       setPickToast(`${item.name} 已入锅 · AI 记下了你的第 ${orderRef.current} 次选择`);
+    }
+  };
+
+  // Handle food grabbed
+  const handleFoodGrabbed = (foodId: string) => {
+    setGrabbedFoodId(foodId);
+  };
+
+  // Handle food dropped - only add to ings when success
+  const handleFoodDropped = (foodId: string, success: boolean) => {
+    setGrabbedFoodId(null);
+    if (success) {
+      // Record pick for AI analysis
+      recordPick(foodId);
+      setIngs([...ings, foodId]);
     }
   };
 
@@ -239,17 +272,30 @@ function Play() {
         />
       )}
       {step === "ingredients" && (
-        <IngStep
-          ings={ings}
-          meatPicked={meatPicked}
-          vegPicked={vegPicked}
-          leftColor={leftColor}
-          rightColor={rightColor}
-          secs={secs}
-          lifeLeft={lifeLeft}
-          onToggle={toggleIng}
-          onNext={() => setStep("sauce")}
-        />
+        <>
+          <IngStep
+            ings={ings}
+            meatPicked={meatPicked}
+            vegPicked={vegPicked}
+            leftColor={leftColor}
+            rightColor={rightColor}
+            secs={secs}
+            lifeLeft={lifeLeft}
+            onToggle={toggleIng}
+            onNext={() => setStep("sauce")}
+            gestureEnabled={gestureEnabled}
+            onToggleGesture={() => setGestureEnabled(!gestureEnabled)}
+          />
+          <GestureGameLayer
+            enabled={gestureEnabled && step === "ingredients"}
+            foodPositions={foodPositions}
+            grabbedFoodId={grabbedFoodId}
+            onFoodGrabbed={handleFoodGrabbed}
+            onFoodDropped={handleFoodDropped}
+            showGuide={showGestureGuide}
+            onCloseGuide={() => setShowGestureGuide(false)}
+          />
+        </>
       )}
       {step === "sauce" && (
         <SauceStep conds={conds} onToggle={toggleCond} onConfirm={() => setStep("boiling")} />
@@ -644,6 +690,8 @@ function IngStep({
   lifeLeft,
   onToggle,
   onNext,
+  gestureEnabled,
+  onToggleGesture,
 }: {
   ings: string[];
   meatPicked: number;
@@ -654,6 +702,8 @@ function IngStep({
   lifeLeft: number;
   onToggle: (id: string) => void;
   onNext: () => void;
+  gestureEnabled?: boolean;
+  onToggleGesture?: () => void;
 }) {
   const ring = INGREDIENTS.map((it, i) => {
     const a = -Math.PI / 2 + (i + 0.5) * ((2 * Math.PI) / 12);
@@ -862,6 +912,37 @@ function IngStep({
             }}
           />
         </div>
+      </div>
+
+      {/* 手势模式切换按钮 */}
+      <div style={{ position: "absolute", left: 34, top: 80 }}>
+        <button
+          onClick={() => onToggleGesture?.()}
+          style={{
+            background: gestureEnabled ? "#00aa00" : "rgba(0,0,0,0.5)",
+            border: "1.5px solid",
+            borderColor: gestureEnabled ? "#00ff00" : "rgba(154,123,74,.4)",
+            borderRadius: 8,
+            padding: "8px 16px",
+            color: "#fff",
+            fontSize: 13,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            transition: "all .2s ease",
+          }}
+        >
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: gestureEnabled ? "#00ff00" : "#888",
+            }}
+          />
+          手势模式 {gestureEnabled ? "ON" : "OFF"}
+        </button>
       </div>
 
       <div
