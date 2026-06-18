@@ -159,6 +159,11 @@ function Report() {
             }}
           >
             <div>
+              {summary.nickname && (
+                <div style={{ fontSize: 12, color: "#9a6b3a", letterSpacing: ".1em", marginBottom: 5 }}>
+                  致 「{summary.nickname}」
+                </div>
+              )}
               <div
                 style={{ fontFamily: serif, fontWeight: 900, fontSize: 23, letterSpacing: ".12em" }}
               >

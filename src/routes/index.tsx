@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { Stage } from "@/components/Stage";
 import { YuanyangPot } from "@/components/hotpot-art";
+import { loadSession, saveSession } from "@/lib/session";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -180,6 +181,7 @@ function RitualTrack() {
 }
 
 function Index() {
+  const [nickname, setNickname] = useState(() => loadSession().nickname ?? "");
   return (
     <Stage>
       <CornerMarks />
@@ -230,6 +232,32 @@ function Index() {
 
       {/* CTA */}
       <div style={{ position: "absolute", left: 0, right: 0, bottom: 34, textAlign: "center" }}>
+        {/* 昵称:仅展示用,不进入人生故事生成 */}
+        <div style={{ marginBottom: 18 }}>
+          <input
+            value={nickname}
+            onChange={(e) => {
+              const v = e.target.value;
+              setNickname(v);
+              saveSession({ ...loadSession(), nickname: v.trim() ? v.trim() : undefined });
+            }}
+            placeholder="怎么称呼你？（可不填）"
+            maxLength={12}
+            style={{
+              width: 280,
+              padding: "11px 18px",
+              borderRadius: 6,
+              border: "1.5px solid rgba(154,107,58,.5)",
+              background: "rgba(255,255,255,.55)",
+              color: "#2c2418",
+              fontFamily: serif,
+              fontSize: 16,
+              letterSpacing: ".08em",
+              textAlign: "center",
+              outline: "none",
+            }}
+          />
+        </div>
         <Link to="/capture" className="lh-sweep" style={cta}>
           开 始 · 煮 一 锅 人 生 <span style={{ fontSize: 18 }}>→</span>
         </Link>

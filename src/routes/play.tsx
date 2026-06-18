@@ -214,13 +214,15 @@ function Play() {
   const rightColor = bases[1] ? baseById(bases[1])?.color : undefined;
 
   const goReport = () => {
+    const sess = loadSession();
     const summary: SelectionSummary = {
       base: bases,
       ingredients: ings,
       condiments: conds,
       picks: picksRef.current,
+      nickname: sess.nickname,
     };
-    saveSession({ ...loadSession(), ...summary });
+    saveSession({ ...sess, ...summary });
     navigate({ to: "/report/$id", params: { id: encodeSummary(summary) } });
   };
 
