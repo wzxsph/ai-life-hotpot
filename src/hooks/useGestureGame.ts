@@ -54,16 +54,7 @@ export interface GestureGameAPI {
 }
 
 export function useGestureGame(opts: UseGestureGameOptions): GestureGameAPI {
-  const {
-    initialFoods,
-    gameW,
-    gameH,
-    hotpotX,
-    hotpotY,
-    hotpotR,
-    grabR = 55,
-    onDropped,
-  } = opts;
+  const { initialFoods, gameW, gameH, hotpotX, hotpotY, hotpotR, grabR = 55, onDropped } = opts;
 
   const [foods, setFoods] = useState<GestureFood[]>(initialFoods);
   const [cursor, setCursor] = useState({ x: gameW / 2, y: gameH / 2 });
@@ -80,9 +71,7 @@ export function useGestureGame(opts: UseGestureGameOptions): GestureGameAPI {
       const cx = clamp(x, 20, gameW - 20);
       const cy = clamp(y, 20, gameH - 20);
       setCursor({ x: cx, y: cy });
-      setFoods((prev) =>
-        prev.map((f) => (f.grabbed ? { ...f, x: cx, y: cy } : f)),
-      );
+      setFoods((prev) => prev.map((f) => (f.grabbed ? { ...f, x: cx, y: cy } : f)));
     },
     [gameW, gameH],
   );
@@ -127,7 +116,14 @@ export function useGestureGame(opts: UseGestureGameOptions): GestureGameAPI {
           setFoods((prev) =>
             prev.map((f) =>
               f.id === target.id
-                ? { ...f, grabbed: false, x: newPos.x, y: newPos.y, originX: newPos.x, originY: newPos.y }
+                ? {
+                    ...f,
+                    grabbed: false,
+                    x: newPos.x,
+                    y: newPos.y,
+                    originX: newPos.x,
+                    originY: newPos.y,
+                  }
                 : f,
             ),
           );
@@ -135,9 +131,7 @@ export function useGestureGame(opts: UseGestureGameOptions): GestureGameAPI {
         } else {
           setFoods((prev) =>
             prev.map((f) =>
-              f.id === target.id
-                ? { ...f, grabbed: false, x: f.originX, y: f.originY }
-                : f,
+              f.id === target.id ? { ...f, grabbed: false, x: f.originX, y: f.originY } : f,
             ),
           );
           onDroppedRef.current?.({ foodId: target.id, food: target, dropped: false });

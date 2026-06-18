@@ -53,6 +53,7 @@ export function GestureGameLayer({
   const [camReady, setCamReady] = useState(false);
   const [camError, setCamError] = useState<string | null>(null);
   const [loadingModel, setLoadingModel] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   // 摄像头
   useEffect(() => {
@@ -173,7 +174,7 @@ export function GestureGameLayer({
         </div>
       ))}
 
-      {/* 摄像头预览 */}
+      {/* 摄像头预览 — 可折叠 */}
       <div
         style={{
           position: "absolute",
@@ -182,56 +183,97 @@ export function GestureGameLayer({
           zIndex: 150,
         }}
       >
-        <div
-          style={{
-            background: "rgba(0, 0, 0, 0.75)",
-            borderRadius: 12,
-            padding: 12,
-            boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-          }}
-        >
-          {camError ? (
-            <div
-              style={{
-                width: CAM_W,
-                height: CAM_H,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "#1a1a1a",
-                borderRadius: 8,
-                color: "#ff6666",
-                padding: 16,
-                textAlign: "center",
-              }}
-            >
-              {camError}
-            </div>
-          ) : (
-            <>
-              <canvas
-                ref={canvasRef}
-                style={{ width: CAM_W, height: CAM_H, borderRadius: 8, display: "block" }}
-              />
-              <video ref={videoRef} style={{ display: "none" }} />
-            </>
-          )}
-          <div
+        {collapsed ? (
+          <button
+            onClick={() => setCollapsed(false)}
+            title="展开摄像头预览"
             style={{
-              marginTop: 8,
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              border: `2px solid ${gestureColor(gesture)}`,
+              background: "rgba(0,0,0,0.75)",
+              color: gestureColor(gesture),
+              fontSize: 20,
+              cursor: "pointer",
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
-              color: "#aaa",
-              fontSize: 12,
+              justifyContent: "center",
+              boxShadow: `0 4px 12px ${gestureColor(gesture)}40`,
             }}
           >
-            <span>手势模式 {loadingModel ? "（加载模型中...）" : ""}</span>
-            <span style={{ color: gestureColor(gesture) }}>
-              {gestureLabel(gesture)}
-            </span>
+            📷
+          </button>
+        ) : (
+          <div
+            style={{
+              background: "rgba(0, 0, 0, 0.75)",
+              borderRadius: 12,
+              padding: 12,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 6 }}>
+              <button
+                onClick={() => setCollapsed(true)}
+                title="折叠"
+                style={{
+                  background: "rgba(255,255,255,0.1)",
+                  border: "none",
+                  color: "#aaa",
+                  cursor: "pointer",
+                  width: 24,
+                  height: 24,
+                  borderRadius: 4,
+                  fontSize: 14,
+                  lineHeight: 1,
+                  padding: 0,
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            {camError ? (
+              <div
+                style={{
+                  width: CAM_W,
+                  height: CAM_H,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "#1a1a1a",
+                  borderRadius: 8,
+                  color: "#ff6666",
+                  padding: 16,
+                  textAlign: "center",
+                }}
+              >
+                {camError}
+              </div>
+            ) : (
+              <>
+                <canvas
+                  ref={canvasRef}
+                  style={{ width: CAM_W, height: CAM_H, borderRadius: 8, display: "block" }}
+                />
+                <video ref={videoRef} style={{ display: "none" }} />
+              </>
+            )}
+            <div
+              style={{
+                marginTop: 8,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                color: "#aaa",
+                fontSize: 12,
+              }}
+            >
+              <span>手势模式 {loadingModel ? "（加载模型中...）" : ""}</span>
+              <span style={{ color: gestureColor(gesture) }}>{gestureLabel(gesture)}</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 虚拟光标（始终显示） */}
@@ -288,9 +330,15 @@ export function GestureGameLayer({
             onClick={(e) => e.stopPropagation()}
           >
             <h2 style={{ marginTop: 0 }}>手势投料玩法</h2>
-            <p>👋 <b>伸出手</b>：摄像头识别后，光标跟随手腕</p>
-            <p>✊ <b>握拳</b>：抓取光标处的食材（食材会跟手）</p>
-            <p>🖐️ <b>张开</b>：在锅里→投放成功；不在锅里→回归原位</p>
+            <p>
+              👋 <b>伸出手</b>：摄像头识别后，光标跟随手腕
+            </p>
+            <p>
+              ✊ <b>握拳</b>：抓取光标处的食材（食材会跟手）
+            </p>
+            <p>
+              🖐️ <b>张开</b>：在锅里→投放成功；不在锅里→回归原位
+            </p>
             <button
               onClick={onCloseGuide}
               style={{

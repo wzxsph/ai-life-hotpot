@@ -10,10 +10,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  FilesetResolver,
-  HandLandmarker,
-} from "@mediapipe/tasks-vision";
+import { FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
 
 export type GestureState = "open" | "fist" | "trans" | "none";
 
